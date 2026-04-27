@@ -33,7 +33,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <NavigationContainer>
           {authenticated ? (
             <MainTabs onDisconnect={() => setAuthenticated(false)} />

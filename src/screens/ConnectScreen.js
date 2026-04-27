@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { saveCredentials } from '../api/client';
@@ -83,6 +84,10 @@ export default function ConnectScreen({ onConnected }) {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
+          <Image
+            source={require('../../assets/pocketly.png')}
+            style={{ width: 100, height: 100, marginBottom: 12, resizeMode: 'contain' }}
+          />
           <Text style={styles.title}>Pocketly</Text>
           <Text style={styles.subtitle}>Connect to your server</Text>
         </View>

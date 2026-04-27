@@ -1,3 +1,4 @@
+import { View, Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import RecordsScreen from '../screens/RecordsScreen';
@@ -30,9 +31,24 @@ export default function MainTabs({ onDisconnect }) {
           tabBarActiveTintColor: '#1f644e',
           tabBarInactiveTintColor: '#7c8e88',
           tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#e5e3d8' },
-          headerStyle: { backgroundColor: '#1f644e' },
-          headerTintColor: '#fff',
+          headerStyle: { 
+            backgroundColor: '#fff', 
+            borderBottomWidth: 1, 
+            borderBottomColor: '#e5e3d8',
+            elevation: 3,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+          },
+          headerTintColor: '#1f644e',
           headerTitleStyle: { fontWeight: 'bold' },
+          headerTitle: () => (
+            <Image
+              source={require('../../assets/pocketly.png')}
+              style={{ width: 100, height: 35, resizeMode: 'contain' }}
+            />
+          ),
         })}
       >
         <Tab.Screen name="Records" component={RecordsScreen} />
