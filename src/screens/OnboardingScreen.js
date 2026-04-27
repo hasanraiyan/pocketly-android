@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  ScrollView,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -69,11 +69,8 @@ export default function OnboardingScreen({ onComplete }) {
 
     return (
       <SafeAreaView key={page.title} style={styles.page} edges={['top', 'bottom']}>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          bounces={false}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
+        <View
+          style={[
             styles.pageContent,
             compactLayout ? styles.pageContentCompact : styles.pageContentRegular,
           ]}
@@ -93,12 +90,19 @@ export default function OnboardingScreen({ onComplete }) {
           </View>
 
           <View style={[styles.heroCard, compactLayout && styles.heroCardCompact]}>
-            <View style={[styles.iconWrap, { backgroundColor: page.panel }]}>
-              <MaterialCommunityIcons
-                name={page.icon}
-                size={compactLayout ? 34 : 40}
-                color={page.accent}
+            <View style={[styles.logoFrame, { backgroundColor: page.panel }]}>
+              <Image
+                source={require('../../assets/pocketly.png')}
+                style={[styles.logoImage, compactLayout && styles.logoImageCompact]}
+                resizeMode="contain"
               />
+              <View style={[styles.logoBadge, { backgroundColor: '#ffffff' }]}>
+                <MaterialCommunityIcons
+                  name={page.icon}
+                  size={compactLayout ? 18 : 20}
+                  color={page.accent}
+                />
+              </View>
             </View>
 
             <Text style={[styles.eyebrow, { color: page.accent }]}>
@@ -152,7 +156,7 @@ export default function OnboardingScreen({ onComplete }) {
               <MaterialCommunityIcons name="arrow-right" size={18} color="#6a7f77" />
             </View>
           )}
-        </ScrollView>
+        </View>
       </SafeAreaView>
     );
   };
@@ -202,18 +206,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pageContent: {
-    flexGrow: 1,
+    flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 40,
-    gap: 24,
+    paddingBottom: 28,
   },
   pageContentCompact: {
     paddingTop: 8,
-    justifyContent: 'space-between',
   },
   pageContentRegular: {
     paddingTop: 16,
-    justifyContent: 'space-between',
   },
   topRow: {
     flexDirection: 'row',
@@ -243,19 +244,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 28,
     paddingHorizontal: 24,
-    paddingVertical: 28,
+    paddingVertical: 24,
+    marginTop: 18,
     gap: 14,
     boxShadow: '0 16px 36px rgba(22, 53, 43, 0.10)',
   },
   heroCardCompact: {
     paddingVertical: 22,
   },
-  iconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
+  logoFrame: {
+    width: 112,
+    height: 112,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  logoImage: {
+    width: 76,
+    height: 76,
+  },
+  logoImageCompact: {
+    width: 68,
+    height: 68,
+  },
+  logoBadge: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 8px 18px rgba(22, 53, 43, 0.12)',
   },
   eyebrow: {
     fontSize: 13,
@@ -281,10 +303,13 @@ const styles = StyleSheet.create({
     color: '#5f756c',
   },
   featuresCard: {
+    flexShrink: 1,
     backgroundColor: '#ffffff',
     borderRadius: 24,
-    padding: 22,
-    gap: 16,
+    paddingHorizontal: 22,
+    paddingVertical: 18,
+    gap: 14,
+    marginTop: 18,
     boxShadow: '0 12px 28px rgba(15, 39, 32, 0.08)',
   },
   featureRow: {
@@ -313,6 +338,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 20,
     paddingVertical: 18,
+    marginTop: 18,
     alignItems: 'center',
     boxShadow: '0 12px 28px rgba(15, 39, 32, 0.08)',
   },
@@ -357,6 +383,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     marginTop: 'auto',
+    paddingTop: 16,
+    minHeight: 48,
   },
   swipeHintText: {
     color: '#6a7f77',
