@@ -42,6 +42,14 @@ Ensure you have the Expo CLI installed and an emulator/physical device ready.
 | **Run on iOS** | `npm run ios` |
 | **Run on Web** | `npm run web` |
 
+## Deployment
+
+To build and submit the application to the Google Play Store (Internal Track), use the following EAS command:
+
+```bash
+npx eas-cli@latest build -p android --profile production --submit
+```
+
 ## Development Conventions
 
 - **Component Style:** Functional components using React Hooks.
