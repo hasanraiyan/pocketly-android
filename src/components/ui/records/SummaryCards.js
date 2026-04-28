@@ -33,8 +33,7 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    marginBottom: 12,
   },
   summaryCard: {
     flex: 1,

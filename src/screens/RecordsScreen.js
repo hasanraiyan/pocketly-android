@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePocketly } from '../context/PocketlyContext';
 import { usePeriod } from '../hooks/usePeriod';
@@ -28,23 +27,25 @@ export default function RecordsScreen() {
     setShowModal(true);
   };
 
+  const header = (
+    <View style={styles.headerContainer}>
+      <SummaryCards income={totalIncome} expense={totalExpense} />
+      <PeriodNavigator
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+        periodType={periodType}
+        onNavigate={navigatePeriod}
+      />
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <SummaryCards income={totalIncome} expense={totalExpense} />
-
-        <PeriodNavigator
-          periodStart={periodStart}
-          periodEnd={periodEnd}
-          periodType={periodType}
-          onNavigate={navigatePeriod}
-        />
-
-        <TransactionList
-          onEditTransaction={handleEditTransaction}
-          isBootstrapLoading={isBootstrapLoading}
-        />
-      </View>
+    <View style={styles.container}>
+      <TransactionList
+        onEditTransaction={handleEditTransaction}
+        isBootstrapLoading={isBootstrapLoading}
+        header={header}
+      />
 
       {/* FAB */}
       <TouchableOpacity
@@ -66,18 +67,18 @@ export default function RecordsScreen() {
           setEditData(null);
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fcfbf5', // Matched with web UI background
+    backgroundColor: '#fcfbf5',
   },
-  content: {
-    flex: 1,
-    paddingTop: 16,
+  headerContainer: {
+    paddingTop: 8,
+    backgroundColor: '#fcfbf5',
   },
   fab: {
     position: 'absolute',
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#1f644e', // Income green, standard for 'Add' here
+    backgroundColor: '#1f644e',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,

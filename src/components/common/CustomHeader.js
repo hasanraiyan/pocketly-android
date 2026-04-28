@@ -42,10 +42,10 @@ export default function CustomHeader({ title, navigation, options, route }) {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e3d8',
-    paddingTop: Platform.OS === 'android' ? 30 : 0, // Handle status bar on Android if not using Expo StatusBar
+    paddingTop: Platform.OS === 'android' ? 10 : 0, // Handle status bar on Android if not using Expo StatusBar
   },
   container: {
     height: 30,
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   brandIcon: {
-    width: 22,
-    height: 22,
+    width: 30,
+    height: 30,
   },
   brandText: {
     fontSize: 20,
