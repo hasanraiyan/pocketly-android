@@ -1,0 +1,158 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+
+const accountIcons = [
+  'wallet', 'purse', 'business', 'server', 'card', 'cash', 'library', 'logo-bitcoin', 'phone-portrait', 'ribbon', 'ippb', 'pnb', 'rupay'
+];
+
+export const getAccountIconName = (icon) => {
+  if (!icon) return 'wallet';
+  const name = icon.toLowerCase();
+  if (name === 'purse') return 'wallet';
+  if (name === 'ippb' || name === 'pnb') return 'business';
+  if (name === 'rupay') return 'card';
+  if (name.includes('wallet')) return 'wallet';
+  if (name.includes('business')) return 'business';
+  if (name.includes('bank') || name.includes('server')) return 'server';
+  if (name.includes('card')) return 'card';
+  if (name.includes('cash')) return 'cash';
+  if (name.includes('library')) return 'library';
+  if (name.includes('bitcoin')) return 'logo-bitcoin';
+  if (name.includes('phone')) return 'phone-portrait';
+  if (name.includes('ribbon')) return 'ribbon';
+  return 'wallet';
+};
+
+const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'JPY'];
+
+export default function AccountForm({ visible, initial, onSave, onClose }) {
+  const [name, setName] = useState(initial?.name || '');
+  const [initialBalance, setInitialBalance] = useState(initial?.initialBalance?.toString() || '0');
+  const [icon, setIcon] = useState(initial?.icon || 'wallet');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!name.trim()) { Alert.alert('Error', 'Account name is required.'); return; }
+    setSaving(true);
+    try {
+      await onSave({ 
+        name: name.trim(), 
+        initialBalance: parseFloat(initialBalance) || 0, 
+        icon,
+        currency: initial?.currency || 'INR',
+        ignored: initial?.ignored || false 
+      });
+      onClose();
+    } catch (err) {
+      Alert.alert('Error', err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <SafeAreaView style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
+            <Ionicons name="close" size={24} color="#7c8e88" />
+            <Text style={styles.headerBtnText}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={styles.modalTitle}>{initial ? 'Edit Account' : 'New Account'}</Text>
+          <TouchableOpacity onPress={handleSave} disabled={saving} style={styles.headerBtnRight}>
+            {saving ? <ActivityIndicator color="#1f644e" size="small" /> : <Text style={styles.saveText}>Save</Text>}
+          </TouchableOpacity>
+        </View>
+        <ScrollView style={{ flex: 1, padding: 16 }} contentContainerStyle={{ gap: 24, paddingBottom: 40 }}>
+          <View>
+            <Text style={styles.label}>Account Name</Text>
+            <View style={styles.webInputWrapper}>
+              <Text style={styles.webInputLabel}>NAME</Text>
+              <TextInput 
+                style={styles.webInput} 
+                value={name} 
+                onChangeText={setName} 
+                placeholder="Account name" 
+                placeholderTextColor="#7c8e88" 
+              />
+            </View>
+          </View>
+
+          <View>
+            <Text style={styles.label}>Initial Amount (₹)</Text>
+            <View style={styles.webInputWrapper}>
+              <Text style={styles.webInputLabel}>AMOUNT</Text>
+              <TextInput 
+                style={styles.webInput} 
+                value={initialBalance} 
+                onChangeText={setInitialBalance} 
+                keyboardType="decimal-pad" 
+                placeholder="0.00"
+                placeholderTextColor="#7c8e88" 
+              />
+            </View>
+          </View>
+
+          <View>
+            <Text style={styles.label}>Select Icon</Text>
+            <View style={styles.iconGrid}>
+              {accountIcons.map((ico) => (
+                <TouchableOpacity
+                  key={ico}
+                  onPress={() => setIcon(ico)}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.iconOption,
+                    icon === ico ? styles.iconOptionActive : styles.iconOptionInactive
+                  ]}
+                >
+                  {ico === 'rupay' ? (
+                     <MaterialCommunityIcons name="credit-card-chip" size={22} color={icon === ico ? '#fff' : '#7c8e88'} />
+                  ) : ico === 'ippb' || ico === 'pnb' ? (
+                     <FontAwesome5 name="university" size={18} color={icon === ico ? '#fff' : '#7c8e88'} />
+                  ) : (
+                     <Ionicons name={getAccountIconName(ico)} size={22} color={icon === ico ? '#fff' : '#7c8e88'} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  modalContainer: { flex: 1, backgroundColor: '#fcfbf5' },
+  modalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12, 
+    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e3d8',
+  },
+  headerBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerBtnText: { fontSize: 14, fontWeight: '700', color: '#7c8e88' },
+  modalTitle: { fontSize: 16, fontWeight: '800', color: '#1e3a34' },
+  headerBtnRight: { minWidth: 60, alignItems: 'flex-end' },
+  saveText: { fontSize: 15, fontWeight: '800', color: '#1f644e' },
+  label: { fontSize: 12, fontWeight: '700', color: '#7c8e88', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  webInputWrapper: { backgroundColor: '#f0f5f2', borderWidth: 1, borderColor: '#1f644e', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
+  webInputLabel: { fontSize: 9, fontWeight: '800', color: '#1f644e', marginBottom: 2 },
+  webInput: { fontSize: 14, fontWeight: '700', color: '#1e3a34', padding: 0 },
+  iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  iconOption: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  iconOptionActive: { backgroundColor: '#1f644e' },
+  iconOptionInactive: { backgroundColor: '#f0f5f2' },
+});
