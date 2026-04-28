@@ -73,7 +73,7 @@ export default function ConnectScreen({ onConnected }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#f0f5f2',
+    backgroundColor: '#fcfbf5',
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 48,

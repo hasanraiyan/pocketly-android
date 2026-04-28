@@ -1,4 +1,4 @@
- import { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,15 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePocketly } from '../context/PocketlyContext';
 
-const INR = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 });
-const fmt = (n) => `₹${INR.format(n)}`;
+const INR = new Intl.NumberFormat('en-IN', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+const fmt = (n) => `₹${INR.format(Math.abs(n))}`;
 
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'JPY'];
 
@@ -41,37 +45,39 @@ function AccountForm({ initial, onSave, onClose }) {
 
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={styles.modalHeader}>
-        <TouchableOpacity onPress={onClose}><Text style={styles.cancel}>Cancel</Text></TouchableOpacity>
-        <Text style={styles.modalTitle}>{initial ? 'Edit Account' : 'New Account'}</Text>
-        <TouchableOpacity onPress={handleSave} disabled={saving}>
-          {saving ? <ActivityIndicator color="#1f644e" /> : <Text style={styles.save}>Save</Text>}
-        </TouchableOpacity>
-      </View>
-      <ScrollView style={{ flex: 1, backgroundColor: '#f7faf7', padding: 16 }} contentContainerStyle={{ gap: 16 }}>
-        <View>
-          <Text style={styles.label}>Name</Text>
-          <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Savings" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fcfbf5' }}>
+        <View style={styles.modalHeader}>
+          <TouchableOpacity onPress={onClose}><Text style={styles.cancel}>Cancel</Text></TouchableOpacity>
+          <Text style={styles.modalTitle}>{initial ? 'Edit Account' : 'New Account'}</Text>
+          <TouchableOpacity onPress={handleSave} disabled={saving}>
+            {saving ? <ActivityIndicator color="#1f644e" /> : <Text style={styles.save}>Save</Text>}
+          </TouchableOpacity>
         </View>
-        <View>
-          <Text style={styles.label}>Initial Balance (₹)</Text>
-          <TextInput style={styles.input} value={initialBalance} onChangeText={setInitialBalance} keyboardType="decimal-pad" />
-        </View>
-        <View>
-          <Text style={styles.label}>Currency</Text>
-          <View style={styles.chipRow}>
-            {CURRENCIES.map((c) => (
-              <TouchableOpacity key={c} style={[styles.chip, currency === c && styles.chipActive]} onPress={() => setCurrency(c)}>
-                <Text style={[styles.chipText, currency === c && styles.chipTextActive]}>{c}</Text>
-              </TouchableOpacity>
-            ))}
+        <ScrollView style={{ flex: 1, padding: 16 }} contentContainerStyle={{ gap: 20 }}>
+          <View>
+            <Text style={styles.label}>Account Name</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Savings" placeholderTextColor="#7c8e88" />
           </View>
-        </View>
-        <TouchableOpacity style={styles.toggleRow} onPress={() => setIgnored(!ignored)}>
-          <Text style={styles.label}>Ignore in total balance</Text>
-          <Ionicons name={ignored ? 'checkbox' : 'square-outline'} size={22} color="#1f644e" />
-        </TouchableOpacity>
-      </ScrollView>
+          <View>
+            <Text style={styles.label}>Initial Balance (₹)</Text>
+            <TextInput style={styles.input} value={initialBalance} onChangeText={setInitialBalance} keyboardType="decimal-pad" placeholderTextColor="#7c8e88" />
+          </View>
+          <View>
+            <Text style={styles.label}>Currency</Text>
+            <View style={styles.chipRow}>
+              {CURRENCIES.map((c) => (
+                <TouchableOpacity key={c} style={[styles.chip, currency === c && styles.chipActive]} onPress={() => setCurrency(c)}>
+                  <Text style={[styles.chipText, currency === c && styles.chipTextActive]}>{c}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <TouchableOpacity style={styles.toggleRow} onPress={() => setIgnored(!ignored)} activeOpacity={0.7}>
+            <Text style={styles.labelToggle}>Ignore in total balance</Text>
+            <Ionicons name={ignored ? 'checkbox' : 'square-outline'} size={24} color={ignored ? '#1f644e' : '#7c8e88'} />
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -98,19 +104,19 @@ export default function AccountsScreen() {
         </View>
         <View>
           <Text style={styles.accName}>{acc.name}</Text>
-          <Text style={styles.accSub}>{acc.currency || 'INR'}{acc.ignored ? ' · ignored' : ''}</Text>
+          <Text style={styles.accSub}>{acc.currency || 'INR'}{acc.ignored ? ' · Ignored' : ''}</Text>
         </View>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
         <Text style={[styles.accBalance, { color: acc.balance >= 0 ? '#1f644e' : '#c94c4c' }]}>
-          {fmt(acc.balance || 0)}
+          {acc.balance < 0 ? '-' : ''}{fmt(acc.balance || 0)}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <TouchableOpacity onPress={() => { setEditAccount(acc); setShowForm(true); }} style={styles.iconBtn}>
-            <Ionicons name="pencil" size={14} color="#7c8e88" />
+            <Ionicons name="pencil" size={16} color="#7c8e88" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleDelete(acc.id, acc.name)} style={styles.iconBtn}>
-            <Ionicons name="trash" size={14} color="#c94c4c" />
+            <Ionicons name="trash" size={16} color="#7c8e88" />
           </TouchableOpacity>
         </View>
       </View>
@@ -118,26 +124,33 @@ export default function AccountsScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0f5f2' }}>
+    <View style={{ flex: 1, backgroundColor: '#fcfbf5' }}>
       <View style={styles.totalBanner}>
-        <Text style={styles.totalLabel}>Total Balance</Text>
-        <Text style={styles.totalVal}>{fmt(stats.totalAccountBalance)}</Text>
+        <View style={styles.bannerContent}>
+          <Text style={styles.totalLabel}>Total Balance</Text>
+          <Text style={styles.totalVal}>
+             {stats.totalAccountBalance < 0 ? '-' : ''}{fmt(stats.totalAccountBalance)}
+          </Text>
+        </View>
       </View>
 
       <FlatList
         data={accounts}
         renderItem={renderAccount}
         keyExtractor={(a) => a.id}
-        contentContainerStyle={{ padding: 12, gap: 8 }}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
         ListEmptyComponent={
-          <View style={styles.center}>
-            <Ionicons name="wallet-outline" size={48} color="#7c8e88" />
-            <Text style={{ color: '#7c8e88', marginTop: 8 }}>No accounts yet</Text>
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconBg}>
+              <Ionicons name="wallet-outline" size={32} color="#7c8e88" />
+            </View>
+            <Text style={styles.emptyTitle}>No accounts yet</Text>
+            <Text style={styles.emptySub}>Tap the + button to add one</Text>
           </View>
         }
       />
 
-      <TouchableOpacity style={styles.fab} onPress={() => { setEditAccount(null); setShowForm(true); }}>
+      <TouchableOpacity style={styles.fab} onPress={() => { setEditAccount(null); setShowForm(true); }} activeOpacity={0.8}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
@@ -154,63 +167,120 @@ export default function AccountsScreen() {
 
 const styles = StyleSheet.create({
   totalBanner: {
-    backgroundColor: '#1f644e',
-    padding: 20,
-    alignItems: 'center',
+    padding: 16,
   },
-  totalLabel: { fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: '600' },
-  totalVal: { fontSize: 28, color: '#fff', fontWeight: '800', marginTop: 4 },
+  bannerContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e3d8',
+  },
+  totalLabel: { 
+    fontSize: 12, 
+    color: '#7c8e88', 
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  totalVal: { 
+    fontSize: 32, 
+    color: '#1f644e', 
+    fontWeight: '800', 
+    marginTop: 8 
+  },
+  
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#e5e3d8',
   },
-  cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#1f644e15',
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#1f644e1a',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  accName: { fontSize: 15, fontWeight: '700', color: '#1e3a34' },
-  accSub: { fontSize: 12, color: '#7c8e88', marginTop: 2 },
-  accBalance: { fontSize: 16, fontWeight: '800' },
-  iconBtn: { padding: 4 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
+  accName: { fontSize: 16, fontWeight: '700', color: '#1e3a34' },
+  accSub: { fontSize: 12, color: '#7c8e88', marginTop: 4, fontWeight: '500' },
+  accBalance: { fontSize: 18, fontWeight: '700' },
+  iconBtn: { padding: 6, backgroundColor: '#f8f9f4', borderRadius: 8 },
+  
+  emptyContainer: {
+    marginTop: 32,
+    padding: 48,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e3d8',
+    alignItems: 'center',
+  },
+  emptyIconBg: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: '#f0f5f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1e3a34',
+    marginBottom: 4,
+  },
+  emptySub: {
+    fontSize: 13,
+    color: '#7c8e88',
+  },
+  
   fab: {
     position: 'absolute', bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#1f644e',
     justifyContent: 'center', alignItems: 'center',
-    elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25, shadowRadius: 4,
+    elevation: 4, shadowColor: '#1e3a34', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15, shadowRadius: 8,
   },
+  
   modalHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 16, borderBottomWidth: 1, borderBottomColor: '#e5e3d8', backgroundColor: '#fff',
+    paddingHorizontal: 16, paddingVertical: 14, 
+    borderBottomWidth: 1, borderBottomColor: '#e5e3d8', 
+    backgroundColor: '#fff',
   },
-  cancel: { color: '#7c8e88', fontSize: 16 },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: '#1e3a34' },
+  cancel: { color: '#7c8e88', fontSize: 16, fontWeight: '500' },
+  modalTitle: { fontSize: 16, fontWeight: '700', color: '#1e3a34' },
   save: { color: '#1f644e', fontSize: 16, fontWeight: '700' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7c8e88', marginBottom: 4 },
+  
+  label: { fontSize: 12, fontWeight: '700', color: '#7c8e88', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  labelToggle: { fontSize: 15, fontWeight: '600', color: '#1e3a34' },
   input: {
-    borderWidth: 1, borderColor: '#e5e3d8', borderRadius: 10,
-    padding: 12, fontSize: 15, backgroundColor: '#fff', color: '#1e3a34',
+    borderWidth: 1, borderColor: '#e5e3d8', borderRadius: 12,
+    paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, 
+    backgroundColor: '#fff', color: '#1e3a34',
   },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   chip: {
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24,
     borderWidth: 1, borderColor: '#e5e3d8', backgroundColor: '#fff',
   },
   chipActive: { backgroundColor: '#1f644e', borderColor: '#1f644e' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#7c8e88' },
+  chipText: { fontSize: 14, fontWeight: '600', color: '#7c8e88' },
   chipTextActive: { color: '#fff' },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  toggleRow: { 
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', 
+    paddingVertical: 16, paddingHorizontal: 16,
+    backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e5e3d8'
+  },
 });

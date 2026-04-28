@@ -12,28 +12,62 @@ export default function PeriodNavigator({ periodStart, periodEnd, periodType, on
   };
 
   return (
-    <View style={styles.periodBar}>
-      <TouchableOpacity onPress={() => onNavigate('prev')}>
-        <Ionicons name="chevron-back" size={22} color="#1f644e" />
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.navButton}
+        onPress={() => onNavigate('prev')}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="chevron-back" size={20} color="#1e3a34" />
       </TouchableOpacity>
-      <Text style={styles.periodLabel}>{periodLabel()}</Text>
-      <TouchableOpacity onPress={() => onNavigate('next')}>
-        <Ionicons name="chevron-forward" size={22} color="#1f644e" />
+
+      <View style={styles.labelContainer}>
+        <Text style={styles.periodLabel} numberOfLines={1}>{periodLabel()}</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.navButton}
+        onPress={() => onNavigate('next')}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="chevron-forward" size={20} color="#1e3a34" />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  periodBar: {
+  container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e3d8',
+    gap: 8,
+    marginBottom: 4,
   },
-  periodLabel: { fontSize: 15, fontWeight: '700', color: '#1e3a34' },
+  navButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e3d8',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  labelContainer: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e3d8',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  periodLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1e3a34',
+  },
 });

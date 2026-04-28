@@ -8,16 +8,17 @@ import PlanningScreen from '../screens/PlanningScreen';
 import ChatScreen from '../screens/ChatScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { PocketlyProvider } from '../context/PocketlyContext';
+import CustomHeader from '../components/common/CustomHeader';
 
 const Tab = createBottomTabNavigator();
 
 const ICON_MAP = {
-  Records: 'list',
-  Accounts: 'wallet',
-  Analysis: 'bar-chart',
-  Planning: 'calendar',
-  Chat: 'chatbubble-ellipses',
-  Settings: 'settings',
+  Records: { active: 'list', inactive: 'list-outline' },
+  Accounts: { active: 'wallet', inactive: 'wallet-outline' },
+  Analysis: { active: 'bar-chart', inactive: 'bar-chart-outline' },
+  Planning: { active: 'calendar', inactive: 'calendar-outline' },
+  Chat: { active: 'chatbubble-ellipses', inactive: 'chatbubble-ellipses-outline' },
+  Settings: { active: 'settings', inactive: 'settings-outline' },
 };
 
 export default function MainTabs({ onDisconnect }) {
@@ -25,30 +26,28 @@ export default function MainTabs({ onDisconnect }) {
     <PocketlyProvider>
       <Tab.Navigator
         screenOptions={({ route }) => ({
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name={ICON_MAP[route.name]} size={size} color={color} />
+          header: (props) => <CustomHeader {...props} />,
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons 
+              name={focused ? ICON_MAP[route.name].active : ICON_MAP[route.name].inactive} 
+              size={24} 
+              color={color} 
+            />
           ),
           tabBarActiveTintColor: '#1f644e',
           tabBarInactiveTintColor: '#7c8e88',
-          tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#e5e3d8' },
-          headerStyle: { 
-            backgroundColor: '#fff', 
-            borderBottomWidth: 1, 
-            borderBottomColor: '#e5e3d8',
-            elevation: 3,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 3,
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '700',
+            marginBottom: 4,
           },
-          headerTintColor: '#1f644e',
-          headerTitleStyle: { fontWeight: 'bold' },
-          headerTitle: () => (
-            <Image
-              source={require('../../assets/pocketly.png')}
-              style={{ width: 100, height: 35, resizeMode: 'contain' }}
-            />
-          ),
+          tabBarStyle: { 
+            backgroundColor: '#fff', 
+            borderTopColor: '#e5e3d8',
+            height: 64,
+            paddingBottom: 8,
+            paddingTop: 8,
+          },
         })}
       >
         <Tab.Screen name="Records" component={RecordsScreen} />

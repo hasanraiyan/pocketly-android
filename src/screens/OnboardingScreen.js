@@ -190,7 +190,7 @@ export default function OnboardingScreen({ onComplete }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7faf8',
+    backgroundColor: '#fcfbf5',
   },
   wrapper: {},
   backgroundBand: {

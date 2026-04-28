@@ -114,7 +114,7 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#f0f5f2' }}
+      style={{ flex: 1, backgroundColor: '#fcfbf5' }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={80}
     >
@@ -123,7 +123,7 @@ export default function ChatScreen() {
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(m) => m.id}
-        contentContainerStyle={{ padding: 12, gap: 8, paddingBottom: 16 }}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 16 }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
       />
 
@@ -132,7 +132,8 @@ export default function ChatScreen() {
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Ask about your finances…"
+          placeholder="Ask about your finances..."
+          placeholderTextColor="#7c8e88"
           multiline
           maxLength={1000}
           editable={!streaming}
@@ -142,7 +143,7 @@ export default function ChatScreen() {
             style={styles.stopBtn}
             onPress={() => abortRef.current?.abort()}
           >
-            <Ionicons name="stop-circle" size={24} color="#c94c4c" />
+            <Ionicons name="stop-circle" size={28} color="#c94c4c" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -160,9 +161,10 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   bubble: {
-    maxWidth: '80%',
+    maxWidth: '85%',
     borderRadius: 16,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   userBubble: {
     alignSelf: 'flex-end',
@@ -176,36 +178,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e3d8',
   },
-  bubbleText: { fontSize: 14, color: '#1e3a34', lineHeight: 20 },
+  bubbleText: { fontSize: 15, color: '#1e3a34', lineHeight: 22 },
   userBubbleText: { color: '#fff' },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e5e3d8',
-    gap: 8,
+    gap: 12,
   },
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: '#e5e3d8',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    fontSize: 14,
-    maxHeight: 100,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    maxHeight: 120,
     color: '#1e3a34',
+    backgroundColor: '#fff',
   },
   sendBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#1f644e',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 2,
   },
   sendBtnDisabled: { opacity: 0.4 },
-  stopBtn: { padding: 4 },
+  stopBtn: { padding: 4, marginBottom: 2 },
 });
