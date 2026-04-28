@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import IconRenderer from '../../common/IconRenderer';
 
 const INR = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 });
 const compactFormatter = new Intl.NumberFormat('en-IN', {
@@ -15,26 +16,6 @@ function formatAmountCompact(amount) {
   return `₹${formatted}`;
 }
 
-const getIconName = (icon) => {
-  if (!icon) return 'pricetag';
-  const name = icon.toLowerCase().replace(/[-_]/g, ' ');
-  if (name.includes('food') || name.includes('pizza') || name.includes('utensils') || name.includes('restaurant') || name.includes('dining') || name.includes('coffee') || name.includes('cafe')) return 'fast-food';
-  if (name.includes('car') || name.includes('bus') || name.includes('train') || name.includes('transport') || name.includes('fuel') || name.includes('gas') || name.includes('travel')) return 'car';
-  if (name.includes('home') || name.includes('house') || name.includes('rent') || name.includes('bill') || name.includes('utility') || name.includes('water') || name.includes('electricity')) return 'home';
-  if (name.includes('shopping') || name.includes('cart') || name.includes('bag') || name.includes('grocery') || name.includes('store') || name.includes('clothing')) return 'cart';
-  if (name.includes('health') || name.includes('heart') || name.includes('medical') || name.includes('doctor') || name.includes('pharmacy') || name.includes('fitness') || name.includes('gym')) return 'heart';
-  if (name.includes('gift') || name.includes('present') || name.includes('birthday') || name.includes('donation')) return 'gift';
-  if (name.includes('salary') || name.includes('cash') || name.includes('money') || name.includes('income') || name.includes('dividend') || name.includes('interest')) return 'cash';
-  if (name.includes('wallet') || name.includes('bank') || name.includes('savings')) return 'wallet';
-  if (name.includes('entertainment') || name.includes('play') || name.includes('game') || name.includes('movie') || name.includes('music') || name.includes('hobby')) return 'game-controller';
-  if (name.includes('education') || name.includes('book') || name.includes('school') || name.includes('tuition') || name.includes('learning')) return 'book';
-  if (name.includes('personal') || name.includes('self') || name.includes('beauty') || name.includes('spa')) return 'person';
-  if (name.includes('work') || name.includes('office') || name.includes('business')) return 'briefcase';
-  if (name.includes('tax') || name.includes('government')) return 'receipt';
-  if (name.includes('other') || name.includes('misc') || name.includes('extra')) return 'ellipsis-horizontal';
-  return 'pricetag';
-};
-
 const typeColor = (type) =>
   type === 'income' ? '#1f644e' : type === 'expense' ? '#c94c4c' : '#4a86e8';
 
@@ -46,10 +27,10 @@ export default function TransactionRow({ tx, isLast, onMore }) {
   return (
     <View style={[styles.txRow, !isLast && styles.txRowBorder]}>
       <View style={[styles.txIconContainer, { backgroundColor: typeColor(tx.type) }]}>
-        <Ionicons
-          name={isTransfer ? 'swap-horizontal' : getIconName(tx.category?.icon)}
-          size={20}
-          color="#fff"
+        <IconRenderer 
+          name={isTransfer ? 'swap' : tx.category?.icon} 
+          size={20} 
+          color="#fff" 
         />
       </View>
       <View style={styles.txInfo}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getIconName } from './CategoryItem';
+import IconRenderer from '../../common/IconRenderer';
 
 const INR = new Intl.NumberFormat('en-IN', {
   notation: 'compact',
@@ -15,7 +15,7 @@ export default function BudgetItem({ budget, onMore }) {
       <View style={styles.budgetCardHeader}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View style={[styles.iconCircleSmall, { backgroundColor: budget.category?.color || '#1f644e' }]}>
-            <Ionicons name={getIconName(budget.category?.icon)} size={18} color="#fff" />
+            <IconRenderer name={budget.category?.icon} size={18} color="#fff" />
           </View>
           <View>
             <Text style={styles.budgetCatName}>{budget.category?.name || 'Category'}</Text>

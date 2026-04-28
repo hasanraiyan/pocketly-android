@@ -14,22 +14,13 @@ import { useTransactions, useTransactionFilters } from '../../../hooks/useTransa
 import TransactionGroup from './TransactionGroup';
 import EmptyState from './EmptyState';
 import BottomSheet from '../../common/BottomSheet';
+import { getIconDetails } from '../../common/IconRenderer';
 
 const INR = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 });
 const fmt = (n) => `₹${INR.format(Math.abs(n))}`;
 
 const typeColor = (type) =>
   type === 'income' ? '#1f644e' : type === 'expense' ? '#c94c4c' : '#4a86e8';
-
-const getIconName = (icon) => {
-  if (!icon) return 'pricetag';
-  if (icon.includes('tag')) return 'pricetag';
-  if (icon.includes('food') || icon.includes('pizza')) return 'fast-food';
-  if (icon.includes('car') || icon.includes('bus')) return 'car';
-  if (icon.includes('home')) return 'home';
-  if (icon.includes('cash') || icon.includes('wallet')) return 'wallet';
-  return 'pricetag';
-};
 
 function groupByDate(transactions) {
   if (!transactions) return [];
@@ -115,11 +106,12 @@ export default function TransactionList({ onEditTransaction, isBootstrapLoading,
           <View style={styles.sheetContent}>
             <View style={styles.txHeader}>
               <View style={[styles.txIconBg, { backgroundColor: typeColor(selectedTx.type) }]}>
-                <Ionicons
-                  name={isTransfer ? 'swap-horizontal' : getIconName(selectedTx.category?.icon)}
-                  size={24}
-                  color="#fff"
-                />
+                {(() => {
+                  const { library: IconLib, name: iconName } = getIconDetails(
+                    isTransfer ? 'swap' : selectedTx.category?.icon
+                  );
+                  return <IconLib name={iconName} size={24} color="#fff" />;
+                })()}
               </View>
               <View style={styles.txHeaderText}>
                 <Text style={styles.txHeaderCat}>
