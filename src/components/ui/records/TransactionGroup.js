@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import TransactionRow from './TransactionRow';
 
-export default function TransactionGroup({ date, txns, onEdit, onDelete }) {
+export default function TransactionGroup({ date, txns, onMore }) {
   return (
     <View style={styles.group}>
       <View style={styles.groupHeader}>
@@ -17,8 +17,7 @@ export default function TransactionGroup({ date, txns, onEdit, onDelete }) {
             key={tx.id}
             tx={tx}
             isLast={index === txns.length - 1}
-            onEdit={onEdit}
-            onDelete={onDelete}
+            onMore={onMore}
           />
         ))}
       </View>

@@ -4,7 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function CustomHeader({ title, navigation, options, route }) {
-  const canGoBack = navigation.canGoBack();
+  // List of bottom tab screen names
+  const tabScreens = [
+    'Records',
+    'Accounts',
+    'Analysis',
+    'Planning',
+    'Chat',
+  ];
+  // If on a tab screen, never show back button
+  const isTabScreen = tabScreens.includes(route?.name);
+  const canGoBack = navigation.canGoBack() && !isTabScreen;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -29,7 +39,11 @@ export default function CustomHeader({ title, navigation, options, route }) {
         </View>
 
         <View style={styles.rightContainer}>
-          <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.profileButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Settings')}
+          >
             <View style={styles.profileIconCircle}>
               <Ionicons name="person" size={20} color="#1f644e" />
             </View>

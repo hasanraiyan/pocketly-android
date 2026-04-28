@@ -96,7 +96,7 @@ export default function SettingsScreen({ navigation, onDisconnect }) {
         </View>
         <View style={styles.aboutRow}>
           <Text style={styles.aboutLabel}>App</Text>
-          <Text style={styles.aboutVal}>Pocketly Mobile</Text>
+          <Text style={styles.aboutVal}>Pocketly</Text>
         </View>
         <View style={[styles.aboutRow, { borderBottomWidth: 0 }]}>
           <Text style={styles.aboutLabel}>Version</Text>

@@ -23,42 +23,37 @@ const ICON_MAP = {
 
 export default function MainTabs({ onDisconnect }) {
   return (
-    <PocketlyProvider>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          header: (props) => <CustomHeader {...props} />,
-          tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons 
-              name={focused ? ICON_MAP[route.name].active : ICON_MAP[route.name].inactive} 
-              size={24} 
-              color={color} 
-            />
-          ),
-          tabBarActiveTintColor: '#1f644e',
-          tabBarInactiveTintColor: '#7c8e88',
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '700',
-            marginBottom: 4,
-          },
-          tabBarStyle: { 
-            backgroundColor: '#fff', 
-            borderTopColor: '#e5e3d8',
-            height: 64,
-            paddingBottom: 8,
-            paddingTop: 8,
-          },
-        })}
-      >
-        <Tab.Screen name="Records" component={RecordsScreen} />
-        <Tab.Screen name="Accounts" component={AccountsScreen} />
-        <Tab.Screen name="Analysis" component={AnalysisScreen} />
-        <Tab.Screen name="Planning" component={PlanningScreen} />
-        <Tab.Screen name="Chat" component={ChatScreen} />
-        <Tab.Screen name="Settings">
-          {(props) => <SettingsScreen {...props} onDisconnect={onDisconnect} />}
-        </Tab.Screen>
-      </Tab.Navigator>
-    </PocketlyProvider>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        header: (props) => <CustomHeader {...props} />,
+        tabBarIcon: ({ focused, color, size }) => (
+          <Ionicons 
+            name={focused ? ICON_MAP[route.name].active : ICON_MAP[route.name].inactive} 
+            size={24} 
+            color={color} 
+          />
+        ),
+        tabBarActiveTintColor: '#1f644e',
+        tabBarInactiveTintColor: '#7c8e88',
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '700',
+          marginBottom: 4,
+        },
+        tabBarStyle: { 
+          backgroundColor: '#fff', 
+          borderTopColor: '#e5e3d8',
+          height: 64,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+      })}
+    >
+      <Tab.Screen name="Records" component={RecordsScreen} />
+      <Tab.Screen name="Accounts" component={AccountsScreen} />
+      <Tab.Screen name="Analysis" component={AnalysisScreen} />
+      <Tab.Screen name="Planning" component={PlanningScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
+    </Tab.Navigator>
   );
 }

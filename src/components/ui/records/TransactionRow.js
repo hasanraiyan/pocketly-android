@@ -30,7 +30,7 @@ const typeColor = (type) =>
 
 const typeSign = (type) => (type === 'income' ? '+' : type === 'expense' ? '-' : '');
 
-export default function TransactionRow({ tx, isLast, onEdit, onDelete }) {
+export default function TransactionRow({ tx, isLast, onMore }) {
   const isTransfer = tx.type === 'transfer';
 
   return (
@@ -61,14 +61,9 @@ export default function TransactionRow({ tx, isLast, onEdit, onDelete }) {
         <Text style={[styles.txAmount, { color: typeColor(tx.type) }]}>
           {typeSign(tx.type)}{formatAmountCompact(tx.amount)}
         </Text>
-        <View style={styles.txActions}>
-          <TouchableOpacity onPress={() => onEdit(tx)} style={styles.iconBtn}>
-            <Ionicons name="pencil" size={16} color="#7c8e88" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => onDelete(tx.id)} style={styles.iconBtn}>
-            <Ionicons name="trash" size={16} color="#7c8e88" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => onMore(tx)} style={styles.moreBtn}>
+          <Ionicons name="ellipsis-vertical" size={20} color="#7c8e88" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -96,8 +91,11 @@ const styles = StyleSheet.create({
   txNote: { fontSize: 14, fontWeight: '700', color: '#1e3a34' },
   txSub: { fontSize: 11, color: '#7c8e88', marginTop: 2, flexDirection: 'row', alignItems: 'center' },
   txDesc: { fontSize: 12, color: '#7c8e88', marginTop: 2 },
-  txAmountActions: { alignItems: 'flex-end' },
-  txAmount: { fontSize: 14, fontWeight: '700', marginBottom: 6 },
-  txActions: { flexDirection: 'row', gap: 8 },
-  iconBtn: { padding: 4, backgroundColor: '#f8f9f4', borderRadius: 8 },
+  txAmountActions: { 
+    flexDirection: 'row',
+    alignItems: 'center', 
+    gap: 8 
+  },
+  txAmount: { fontSize: 14, fontWeight: '700' },
+  moreBtn: { padding: 4, borderRadius: 8 },
 });

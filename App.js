@@ -10,7 +10,7 @@ import * as SecureStore from 'expo-secure-store';
 import { loadCredentials } from './src/api/client';
 import ConnectScreen from './src/screens/ConnectScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import MainTabs from './src/navigation/MainTabs';
+import RootNavigator from './src/navigation/RootNavigator';
 
 const Stack = createStackNavigator();
 
@@ -45,7 +45,7 @@ export default function App() {
         <StatusBar style="dark" />
         <NavigationContainer>
           {authenticated ? (
-            <MainTabs onDisconnect={() => setAuthenticated(false)} />
+            <RootNavigator onDisconnect={() => setAuthenticated(false)} />
           ) : onboardingCompleted ? (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Connect">
