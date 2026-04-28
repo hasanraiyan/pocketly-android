@@ -50,7 +50,7 @@ export default function TransactionList({ onEditTransaction, isBootstrapLoading,
 
   if (isBootstrapLoading) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={[styles.listContent, { flex: 1 }]}>
         {header}
         <View style={styles.center}>
           <Ionicons name="refresh-circle" size={48} color="#1f644e" />

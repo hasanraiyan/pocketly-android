@@ -20,7 +20,6 @@ export default function EmptyState({ search }) {
 
 const styles = StyleSheet.create({
   emptyContainer: {
-    marginHorizontal: 16,
     padding: 48,
     backgroundColor: '#fff',
     borderRadius: 12,
