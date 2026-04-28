@@ -108,8 +108,8 @@ export default function AccountsScreen() {
         </View>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={[styles.accBalance, { color: acc.balance >= 0 ? '#1f644e' : '#c94c4c' }]}>
-          {acc.balance < 0 ? '-' : ''}{fmt(acc.balance || 0)}
+        <Text style={[styles.accBalance, { color: (acc.currentBalance ?? acc.balance ?? 0) >= 0 ? '#1f644e' : '#c94c4c' }]}>
+          {(acc.currentBalance ?? acc.balance ?? 0) < 0 ? '-' : ''}{fmt(acc.currentBalance ?? acc.balance ?? 0)}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <TouchableOpacity onPress={() => { setEditAccount(acc); setShowForm(true); }} style={styles.iconBtn}>
