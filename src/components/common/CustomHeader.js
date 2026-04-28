@@ -140,11 +140,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e3d8',
-    paddingTop: Platform.OS === 'android' ? 10 : 0,
+    paddingTop: Platform.OS === 'android' ? 5 : 0, // Reduce top padding
   },
   container: {
-    height: 50, // Increased height for better interaction
-    paddingHorizontal: 16,
+    height: 40, // Reduced height for compactness
+    paddingHorizontal: 8, // Less horizontal padding
+    paddingBottom: 0,
     justifyContent: 'center',
   },
   contentWrapper: {
@@ -211,9 +212,9 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   profileIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#1f644e1a',
     justifyContent: 'center',
     alignItems: 'center',
@@ -227,9 +228,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f0f5f2',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 40,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    height: 34,
     zIndex: 10,
   },
   searchIconInside: {

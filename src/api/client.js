@@ -44,6 +44,8 @@ export async function api(path, options = {}) {
 }
 
 export function streamChat(body, signal) {
+  console.log('[streamChat] Request to:', `${_baseUrl}/api/pocketly/chat`);
+  console.log('[streamChat] Token exists:', !!_token);
   return fetch(`${_baseUrl}/api/pocketly/chat`, {
     method: 'POST',
     headers: {
