@@ -44,7 +44,7 @@ export async function api(path, options = {}) {
 }
 
 export function streamChat(body, signal) {
-  return fetch(`${_baseUrl}/api/money/chat`, {
+  return fetch(`${_baseUrl}/api/pocketly/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

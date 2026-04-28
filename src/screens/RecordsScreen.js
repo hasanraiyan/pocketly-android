@@ -9,12 +9,21 @@ import PeriodNavigator from '../components/ui/records/PeriodNavigator';
 import SummaryCards from '../components/ui/records/SummaryCards';
 import TransactionList from '../components/ui/records/TransactionList';
 
-export default function RecordsScreen() {
+export default function RecordsScreen({ route }) {
   const { fetchBootstrap, isBootstrapLoading, transactions } = usePocketly();
   const { periodStart, periodEnd, periodType, navigatePeriod } = usePeriod();
   const { calculateTotals } = useTransactionFilters();
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [search, setSearch] = useState('');
+
+  const searchParam = route.params?.search;
+
+  useEffect(() => {
+    if (searchParam !== undefined) {
+      setSearch(searchParam);
+    }
+  }, [searchParam]);
 
   useEffect(() => {
     fetchBootstrap(periodStart, periodEnd);
@@ -45,6 +54,8 @@ export default function RecordsScreen() {
         onEditTransaction={handleEditTransaction}
         isBootstrapLoading={isBootstrapLoading}
         header={header}
+        search={search}
+        onSearchChange={setSearch}
       />
 
       {/* FAB */}

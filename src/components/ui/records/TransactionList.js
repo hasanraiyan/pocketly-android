@@ -42,10 +42,9 @@ function groupByDate(transactions) {
   return Object.entries(groups).sort(([a], [b]) => (a < b ? 1 : -1));
 }
 
-export default function TransactionList({ onEditTransaction, isBootstrapLoading, header }) {
+export default function TransactionList({ onEditTransaction, isBootstrapLoading, header, search, onSearchChange }) {
   const { deleteTransaction } = useTransactions();
   const { filterBySearch } = useTransactionFilters();
-  const [search, setSearch] = useState('');
   const [selectedTx, setSelectedTx] = useState(null);
 
   const filtered = filterBySearch(search);
@@ -93,18 +92,6 @@ export default function TransactionList({ onEditTransaction, isBootstrapLoading,
         ListHeaderComponent={(
           <View>
             {header}
-            <View style={styles.searchContainer}>
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={18} color="#7c8e88" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search transactions..."
-                  placeholderTextColor="#7c8e88"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-              </View>
-            </View>
           </View>
         )}
         renderItem={({ item: [date, txns] }) => (
@@ -190,25 +177,6 @@ export default function TransactionList({ onEditTransaction, isBootstrapLoading,
 }
 
 const styles = StyleSheet.create({
-  searchContainer: {
-    marginBottom: 16,
-    marginTop: 0,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e5e3d8',
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#1e3a34',
-  },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
   listContent: {
     paddingHorizontal: 16,

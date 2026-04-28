@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,102 +13,160 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { streamChat } from '../api/client';
 
-let msgId = 0;
-const nextId = () => String(++msgId);
-
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
-    { id: nextId(), role: 'assistant', content: 'Hi! I can help you analyze your finances. Ask me anything.' },
+    { 
+      id: 'welcome', 
+      role: 'assistant', 
+      content: "Hi! I'm your Finance Assistant. I can help you understand your spending habits, track budgets, and get insights about your finances. How can I help you today?",
+      steps: []
+    },
   ]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const abortRef = useRef(null);
   const listRef = useRef(null);
 
-  const addMessage = useCallback((msg) => {
-    setMessages((prev) => [...prev, msg]);
-    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
-  }, []);
+  const processStream = useCallback(async (res, assistantId) => {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
 
-  const updateLastAssistant = useCallback((delta) => {
-    setMessages((prev) => {
-      const last = prev[prev.length - 1];
-      if (last?.role === 'assistant' && last._streaming) {
-        return [...prev.slice(0, -1), { ...last, content: last.content + delta }];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const event = JSON.parse(line);
+          
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last?.id !== assistantId) return prev;
+
+            let nextContent = last.content;
+            let nextSteps = [...(last.steps || [])];
+
+            if (event.type === 'content' && event.message) {
+              nextContent += event.message;
+            } else if (event.type === 'tool_start') {
+              nextSteps.push({ 
+                id: event.toolCallId, 
+                label: event.label, 
+                done: false 
+              });
+            } else if (event.type === 'tool_end') {
+              nextSteps = nextSteps.map(s => 
+                (s.id === event.toolCallId || s.label === event.label) 
+                  ? { ...s, done: true } 
+                  : s
+              );
+            }
+
+            return [
+              ...prev.slice(0, -1),
+              { ...last, content: nextContent, steps: nextSteps }
+            ];
+          });
+        } catch {}
       }
-      return prev;
-    });
+    }
   }, []);
 
   const send = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
 
-    const userMsg = { id: nextId(), role: 'user', content: text };
-    const assistantMsg = { id: nextId(), role: 'assistant', content: '', _streaming: true };
+    const userMsg = { id: String(Date.now()), role: 'user', content: text };
+    const assistantId = String(Date.now() + 1);
+    const assistantMsg = { 
+      id: assistantId, 
+      role: 'assistant', 
+      content: '', 
+      steps: [], 
+      _streaming: true 
+    };
 
     setInput('');
     setStreaming(true);
-    addMessage(userMsg);
-    addMessage(assistantMsg);
+    setMessages(prev => [...prev, userMsg, assistantMsg]);
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
-      const chatHistory = messages.map((m) => ({ role: m.role, content: m.content }));
+      const chatHistory = messages
+        .filter(m => m.content)
+        .map(m => ({ role: m.role, content: m.content }));
+
       const res = await streamChat(
         { userMessage: text, chatHistory, meta: { now: new Date().toISOString() } },
         controller.signal
       );
 
       if (!res.ok) {
-        updateLastAssistant('\n[Error: ' + res.status + ']');
-        return;
+        throw new Error('Failed to connect');
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split('\n');
-        buf = lines.pop();
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const event = JSON.parse(line);
-            if (event.type === 'content' && event.content) {
-              updateLastAssistant(event.content);
-            }
-          } catch {}
-        }
-      }
+      await processStream(res, assistantId);
     } catch (err) {
       if (err.name !== 'AbortError') {
-        updateLastAssistant('\n[Network error]');
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.id === assistantId) {
+            return [...prev.slice(0, -1), { ...last, content: 'Sorry, I encountered an error. Please try again.' }];
+          }
+          return prev;
+        });
       }
     } finally {
       setStreaming(false);
       abortRef.current = null;
-      setMessages((prev) => {
+      setMessages(prev => {
         const last = prev[prev.length - 1];
-        if (last?._streaming) {
+        if (last?.id === assistantId) {
           return [...prev.slice(0, -1), { ...last, _streaming: false }];
         }
         return prev;
       });
     }
-  }, [input, streaming, messages, addMessage, updateLastAssistant]);
+  }, [input, streaming, messages, processStream]);
 
   const renderMessage = ({ item }) => (
-    <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
-      <Text style={[styles.bubbleText, item.role === 'user' && styles.userBubbleText]}>
-        {item.content || (item._streaming ? '…' : '')}
-      </Text>
+    <View style={[styles.bubbleContainer, item.role === 'user' ? styles.userContainer : styles.assistantContainer]}>
+      {item.role === 'assistant' && (
+        <View style={styles.assistantIcon}>
+           <Ionicons name="sparkles" size={12} color="#fff" />
+        </View>
+      )}
+      <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
+        {item.steps && item.steps.length > 0 && (
+          <View style={styles.stepsContainer}>
+            {item.steps.map((step, i) => (
+              <View key={i} style={styles.stepRow}>
+                {step.done ? (
+                  <Ionicons name="checkmark-circle" size={14} color="#1f644e" />
+                ) : (
+                  <ActivityIndicator size="small" color="#1f644e" style={{ transform: [{ scale: 0.7 }] }} />
+                )}
+                <Text style={styles.stepText}>{step.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {item.content ? (
+          <Text style={[styles.bubbleText, item.role === 'user' && styles.userBubbleText]}>
+            {item.content}
+          </Text>
+        ) : (
+          item._streaming && item.steps?.length === 0 && <ActivityIndicator size="small" color="#1f644e" />
+        )}
+      </View>
     </View>
   );
 
@@ -116,15 +174,16 @@ export default function ChatScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#fcfbf5' }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={80}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <FlatList
         ref={listRef}
         data={messages}
+        renderMessage={renderMessage} // This is wrong, should be renderItem
         renderItem={renderMessage}
         keyExtractor={(m) => m.id}
-        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 16 }}
-        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+        contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
+        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
       />
 
       <View style={styles.inputBar}>
@@ -143,7 +202,7 @@ export default function ChatScreen() {
             style={styles.stopBtn}
             onPress={() => abortRef.current?.abort()}
           >
-            <Ionicons name="stop-circle" size={28} color="#c94c4c" />
+            <Ionicons name="stop-circle" size={32} color="#c94c4c" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -151,7 +210,7 @@ export default function ChatScreen() {
             onPress={send}
             disabled={!input.trim()}
           >
-            <Ionicons name="send" size={18} color="#fff" />
+            <Ionicons name="arrow-up" size={20} color="#fff" />
           </TouchableOpacity>
         )}
       </View>
@@ -160,19 +219,38 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
+  bubbleContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    maxWidth: '90%',
+  },
+  userContainer: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row-reverse',
+  },
+  assistantContainer: {
+    alignSelf: 'flex-start',
+  },
+  assistantIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#1f644e',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   bubble: {
-    maxWidth: '85%',
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   userBubble: {
-    alignSelf: 'flex-end',
     backgroundColor: '#1f644e',
     borderBottomRightRadius: 4,
   },
   assistantBubble: {
-    alignSelf: 'flex-start',
     backgroundColor: '#fff',
     borderBottomLeftRadius: 4,
     borderWidth: 1,
@@ -180,6 +258,26 @@ const styles = StyleSheet.create({
   },
   bubbleText: { fontSize: 15, color: '#1e3a34', lineHeight: 22 },
   userBubbleText: { color: '#fff' },
+
+  stepsContainer: {
+    marginBottom: 8,
+    gap: 6,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#f0f5f2',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  stepText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1f644e',
+  },
+
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -200,7 +298,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     maxHeight: 120,
     color: '#1e3a34',
-    backgroundColor: '#fff',
+    backgroundColor: '#fcfbf5',
   },
   sendBtn: {
     width: 44,

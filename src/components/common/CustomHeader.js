@@ -1,9 +1,14 @@
-import React from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Image, StyleSheet, TouchableOpacity, Text, Platform, TextInput, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CustomHeader({ title, navigation, options, route }) {
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
+  const animationValue = useRef(new Animated.Value(0)).current;
+
   // List of bottom tab screen names
   const tabScreens = [
     'Records',
@@ -12,42 +17,118 @@ export default function CustomHeader({ title, navigation, options, route }) {
     'Planning',
     'Chat',
   ];
-  // If on a tab screen, never show back button
+  
   const isTabScreen = tabScreens.includes(route?.name);
   const canGoBack = navigation.canGoBack() && !isTabScreen;
+  const isRecordsScreen = route?.name === 'Records';
+
+  useEffect(() => {
+    if (isSearching) {
+      Animated.timing(animationValue, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: false,
+      }).start(() => {
+        searchInputRef.current?.focus();
+      });
+    } else {
+      Animated.timing(animationValue, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+      setSearchQuery('');
+      if (isRecordsScreen) {
+        navigation.setParams({ search: '' });
+      }
+    }
+  }, [isSearching]);
+
+  const handleSearchChange = (text) => {
+    setSearchQuery(text);
+    navigation.setParams({ search: text });
+  };
+
+  const toggleSearch = () => {
+    setIsSearching(!isSearching);
+  };
+
+  const searchWidth = animationValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+  const contentOpacity = animationValue.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
+
+  const searchOpacity = animationValue.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.leftContainer}>
-          {canGoBack ? (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Ionicons name="chevron-back" size={24} color="#1e3a34" />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.brandContainer}>
-              <View style={styles.iconCircle}>
-                <Image
-                  source={require('../../../assets/pocketly.png')}
-                  style={styles.brandIcon}
-                  resizeMode="contain"
-                />
+        <View style={styles.contentWrapper}>
+          <Animated.View style={[styles.leftContainer, { opacity: contentOpacity }]}>
+            {canGoBack ? (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons name="chevron-back" size={24} color="#1e3a34" />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.brandContainer}>
+                <View style={styles.iconCircle}>
+                  <Image
+                    source={require('../../../assets/pocketly.png')}
+                    style={styles.brandIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text style={styles.brandText}>Pocketly</Text>
               </View>
-              <Text style={styles.brandText}>Pocketly</Text>
-            </View>
-          )}
-        </View>
+            )}
+          </Animated.View>
 
-        <View style={styles.rightContainer}>
-          <TouchableOpacity
-            style={styles.profileButton}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <View style={styles.profileIconCircle}>
-              <Ionicons name="person" size={20} color="#1f644e" />
-            </View>
-          </TouchableOpacity>
+          {isRecordsScreen && isSearching && (
+            <Animated.View style={[styles.searchBarContainer, { width: searchWidth, opacity: searchOpacity }]}>
+              <Ionicons name="search" size={20} color="#1f644e" style={styles.searchIconInside} />
+              <TextInput
+                ref={searchInputRef}
+                style={styles.searchInput}
+                placeholder="Search transactions..."
+                placeholderTextColor="#7c8e88"
+                value={searchQuery}
+                onChangeText={handleSearchChange}
+                autoCorrect={false}
+              />
+              <TouchableOpacity onPress={toggleSearch} style={styles.closeSearchButton}>
+                <Ionicons name="close-circle" size={20} color="#7c8e88" />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+
+          <Animated.View style={[styles.rightContainer, { opacity: contentOpacity }]}>
+            {isRecordsScreen && !isSearching && (
+              <TouchableOpacity
+                style={styles.headerIconButton}
+                onPress={toggleSearch}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="search" size={24} color="#1f644e" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.profileButton}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <View style={styles.profileIconCircle}>
+                <Ionicons name="person" size={20} color="#1f644e" />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       </View>
     </SafeAreaView>
@@ -59,14 +140,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e3d8',
-    paddingTop: Platform.OS === 'android' ? 10 : 0, // Handle status bar on Android if not using Expo StatusBar
+    paddingTop: Platform.OS === 'android' ? 10 : 0,
   },
   container: {
-    height: 30,
+    height: 50, // Increased height for better interaction
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
+  contentWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    position: 'relative',
+    height: '100%',
   },
   leftContainer: {
     flexDirection: 'row',
@@ -83,7 +169,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-
   },
   iconCircle: {
     width: 34,
@@ -107,6 +192,20 @@ const styles = StyleSheet.create({
   rightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+  },
+  headerIconButton: {
+    padding: 2,
+  },
+  iconCircleSmall: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#f0f5f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e3d8',
   },
   profileButton: {
     padding: 2,
@@ -121,4 +220,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e3d8',
   },
+  searchBarContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f5f2',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 40,
+    zIndex: 10,
+  },
+  searchIconInside: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1e3a34',
+    paddingVertical: 0,
+  },
+  closeSearchButton: {
+    padding: 4,
+  },
 });
+
