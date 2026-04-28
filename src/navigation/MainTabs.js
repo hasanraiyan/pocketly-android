@@ -50,8 +50,8 @@ export default function MainTabs({ onDisconnect }) {
       })}
     >
       <Tab.Screen name="Records" component={RecordsScreen} />
-      <Tab.Screen name="Accounts" component={AccountsScreen} />
       <Tab.Screen name="Analysis" component={AnalysisScreen} />
+      <Tab.Screen name="Accounts" component={AccountsScreen} />
       <Tab.Screen name="Planning" component={PlanningScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
     </Tab.Navigator>

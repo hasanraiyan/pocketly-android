@@ -1,22 +1,19 @@
-import { createContext, useContext, useReducer, useCallback, useRef } from 'react';
+import { createContext, useContext, useReducer, useCallback, useRef, useEffect } from 'react';
 import { api } from '../api/client';
 
 const PocketlyContext = createContext(null);
 
-function getWeekStart(date = new Date()) {
+function getMonthStart(date = new Date()) {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
+  d.setDate(1);
   d.setHours(0, 0, 0, 0);
   return d.toISOString();
 }
 
-function getWeekEnd(date = new Date()) {
+function getMonthEnd(date = new Date()) {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? 0 : 7);
-  d.setDate(diff);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
   d.setHours(23, 59, 59, 999);
   return d.toISOString();
 }
@@ -29,6 +26,8 @@ const initialState = {
   stats: {
     totalAccountBalance: 0,
     totalTransactionCount: 0,
+    totalExpense: 0,
+    totalIncome: 0,
     accountCount: 0,
     categoryCount: 0,
   },
@@ -37,9 +36,9 @@ const initialState = {
   isBootstrapLoading: true,
   isSyncing: false,
   error: null,
-  periodStart: getWeekStart(),
-  periodEnd: getWeekEnd(),
-  periodType: 'week',
+  periodStart: getMonthStart(),
+  periodEnd: getMonthEnd(),
+  periodType: 'month',
 };
 
 function reducer(state, action) {
@@ -251,10 +250,24 @@ export function PocketlyProvider({ children }) {
     dispatch({ type: 'SET_BUDGETS', payload: state.budgets.filter((b) => b.id !== id) });
   }, [state.budgets]);
 
+  const totalExpense = state.transactions
+    .filter((t) => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalIncome = state.transactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  useEffect(() => {
+    fetchBootstrap(state.periodStart, state.periodEnd);
+  }, [fetchBootstrap]);
+
   return (
     <PocketlyContext.Provider
       value={{
         ...state,
+        totalIncome,
+        totalExpense,
         fetchBootstrap,
         fetchTransactions,
         fetchAccounts,
